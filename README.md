@@ -1,1 +1,3 @@
 # NUTS.exe-Lyric-Coder
+
+Uma página web que simula o editor Visual Studio Code e "digita" a letra de uma música enquanto ela toca, no mesmo ritmo do áudio. Começa com uma tela de boot de terminal. Depois mostra o editor com números de linha, cursor piscando e palavras coloridas, além de um terminal que registra o que está acontecendo. Você carrega seu próprio áudio, cola a letra e a sincronização é automática para o music.mp3. Para outras músicas, dá para marcar o tempo de cada verso tocando num botão, ou colar a letra com tempos no formato [mm:ss.xx]. Tudo roda em um único arquivo HTML, no celular ou no navegador.
