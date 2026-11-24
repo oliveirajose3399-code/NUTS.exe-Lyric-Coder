@@ -1,0 +1,753 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NUTS.exe | Developer Edition</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#080c14;color:#d8e2f0;
+ font-family:Consolas,monospace;overflow:hidden
+}
+button,label{
+ background:#182b42;border:1px solid #35516d;
+ color:#8be9fd;padding:10px 13px;border-radius:4px;
+ font:11px Consolas;cursor:pointer
+}
+button:active,label:active{background:#294867}
+input[type=file]{display:none}
+
+#boot{
+ position:fixed;inset:0;background:#030609;z-index:10;
+ display:flex;align-items:center;justify-content:center;
+ color:#50fa7b;padding:25px;line-height:2;
+ font-size:12px;transition:opacity 1s
+}
+#app{
+ height:100dvh;display:flex;flex-direction:column;
+ opacity:0;transition:opacity 1s
+}
+.top{
+ height:40px;background:#111a28;border-bottom:1px solid #29364b;
+ display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0
+}
+.dot{width:10px;height:10px;border-radius:50%}
+.red{background:#ff5f57}
+.yellow{background:#febc2e}
+.green{background:#28c840}
+.brand{font-size:11px;color:#a3b3c9;margin-left:7px}
+
+.workspace{display:flex;flex:1;min-height:0}
+.activity{
+ width:35px;background:#0b111c;border-right:1px solid #29364b;
+ display:flex;flex-direction:column;align-items:center;
+ gap:23px;padding-top:15px;color:#8da0b9
+}
+.sidebar{
+ width:105px;background:#0e1521;border-right:1px solid #29364b;
+ padding:12px 7px;font-size:10px;color:#a0b0c4;flex-shrink:0
+}
+.sideTitle{font-size:9px;letter-spacing:1px;margin-bottom:13px;color:#71849d}
+.file{padding:7px 2px}
+.active{background:#1b2a3e;color:#8be9fd}
+
+.editor{flex:1;min-width:0;display:flex;flex-direction:column}
+.tabs{
+ height:35px;background:#111a28;border-bottom:1px solid #29364b;
+ padding:11px;font-size:11px;color:#8be9fd
+}
+.path{
+ height:25px;background:#0e1521;padding:6px 10px;
+ font-size:9px;color:#758ba6
+}
+.codeWrap{flex:1;min-height:0;display:flex;background:#0d1420;overflow:hidden}
+#numbers{
+ width:35px;flex-shrink:0;text-align:right;color:#52647e;
+ padding:14px 6px;white-space:pre;line-height:1.8;
+ font-size:12px;overflow:hidden
+}
+#editorArea{
+ flex:1;overflow:auto;padding:14px 9px;
+ font-size:12px;line-height:1.8;white-space:pre-wrap;
+ overflow-wrap:anywhere
+}
+#code{color:#d8e2f0}
+.cursor{
+ display:inline-block;width:7px;height:15px;
+ background:#00e5ff;animation:blink .8s infinite;
+ vertical-align:middle
+}
+@keyframes blink{50%{opacity:0}}
+.pink{color:#ff79c6}
+.blue{color:#8be9fd}
+.purple{color:#bd93f9}
+.orange{color:#ffb86c}
+.yellowText{color:#f1fa8c}
+.greenText{color:#50fa7b}
+
+.panel{
+ height:125px;background:#0b111b;border-top:1px solid #29364b;
+ display:flex;flex-direction:column;flex-shrink:0
+}
+.panelTabs{
+ height:29px;display:flex;gap:18px;padding:9px 12px;
+ font-size:9px;color:#91a2b8;border-bottom:1px solid #29364b
+}
+.panelTabs span:first-child{color:#8be9fd}
+#terminal{
+ padding:8px 12px;overflow:auto;font-size:10px;
+ line-height:1.8;flex:1;color:#94a7bf
+}
+.controls{
+ background:#101a29;padding:9px;display:flex;gap:7px;
+ justify-content:center;flex-wrap:wrap
+}
+.status{
+ height:22px;background:#087e9e;display:flex;
+ justify-content:space-between;align-items:center;
+ padding:0 9px;font-size:9px;color:white
+}
+.settings{
+ background:#101a29;padding:8px 12px;
+ border-top:1px solid #29364b;color:#a7b8cd;
+ font-size:10px
+}
+details summary{cursor:pointer;color:#8be9fd}
+textarea{
+ width:100%;height:110px;margin-top:8px;
+ background:#080e19;color:#d8e2f0;border:1px solid #35516d;
+ padding:9px;font:12px Consolas;resize:vertical
+}
+.apply{margin-top:7px}
+#progress{
+ height:3px;background:#26364b;flex-shrink:0
+}
+#progressBar{height:100%;width:0;background:#00e5ff}
+@media(max-width:380px){
+ .sidebar{width:88px}
+ .activity{width:30px}
+ #editorArea{font-size:11px}
+ .panel{height:110px}
+}
+</style>
+</head>
+
+<body>
+
+<div id="boot"><div id="bootText"></div></div>
+
+<div id="app">
+
+ <header class="top">
+  <span class="dot red"></span>
+  <span class="dot yellow"></span>
+  <span class="dot green"></span>
+  <span class="brand">NUTS.exe — Visual Studio Code</span>
+ </header>
+
+ <div class="workspace">
+  <div class="activity">
+   <span>▣</span><span>⌕</span><span>⑂</span><span>◈</span>
+  </div>
+
+  <aside class="sidebar">
+   <div class="sideTitle">EXPLORER</div>
+   <div>⌄ NUTS_PROJECT</div>
+   <div class="file active">📄 nuts.txt</div>
+   <div class="file">📄 config.json</div>
+   <div class="file">📄 README.md</div>
+   <div class="file">📁 assets</div>
+   <div class="file">♪ music.mp3</div>
+   <br>
+   <div class="sideTitle">OUTLINE</div>
+   <div class="file">◉ Lyrics</div>
+   <div class="file">◉ Timeline</div>
+   <div class="file">◉ Audio</div>
+  </aside>
+
+  <main class="editor">
+   <div class="tabs">● &nbsp; nuts.txt &nbsp; ×</div>
+   <div class="path">NUTS_PROJECT › assets › nuts.txt</div>
+
+   <div class="codeWrap">
+    <div id="numbers">1</div>
+    <div id="editorArea">
+     <span id="code"></span><span class="cursor" id="cursor"></span>
+    </div>
+   </div>
+  </main>
+ </div>
+
+ <div id="progress"><div id="progressBar"></div></div>
+
+ <section class="panel">
+  <div class="panelTabs">
+   <span>TERMINAL</span>
+   <span>OUTPUT</span>
+   <span>DEBUG CONSOLE</span>
+   <span>PROBLEMS</span>
+  </div>
+  <div id="terminal">
+   [SYSTEM] Developer environment initialized.<br>
+   [AUDIO] Waiting for audio input...<br>
+   [BUILD] Process pending.
+  </div>
+ </section>
+
+ <div class="controls">
+  <button id="play">▶ EXECUTE</button>
+  <button id="pause">Ⅱ PAUSE</button>
+  <button id="reset">↻ RESET</button>
+  <button id="sync">⏱ SINCRONIZAR</button>
+  <label for="audioFile">＋ LOAD AUDIO</label>
+  <input type="file" id="audioFile" accept="audio/*">
+ </div>
+
+ <div class="settings">
+  <details>
+   <summary>⚙ EDITAR / COLOCAR LETRA COMPLETA</summary>
+   <textarea id="lyricsInput" placeholder="Cole a letra completa aqui. Uma linha por verso..."></textarea>
+   <button class="apply" id="applyLyrics">APLICAR LETRA</button>
+  </details>
+ </div>
+
+ <div class="status">
+  <span>● MAIN</span>
+  <span id="state">READY</span>
+  <span id="clock">00:00</span>
+ </div>
+</div>
+
+<audio id="music" preload="metadata"></audio>
+
+<script>
+const $ = id => document.getElementById(id);
+const music = $("music");
+
+// Trecho inicial fornecido anteriormente.
+// Para usar a letra completa, cole-a no painel de edição.
+const initialLyrics = [
+"I can see it in your eyes",
+"That you wanna get out",
+"I can see it in your eyes",
+"That you need it right now",
+"That you need it right now",
+"That you wanna get out",
+"That you need it right now",
+"That you wanna get out",
+"",
+"Yeah, I just wanna hear the sound",
+"Drive our Camaros out of town",
+"Baby, we could leave right now (Woah)",
+"Yeah, I just wanna feel alive",
+"Baby take your time"
+];
+
+let lyrics = [...initialLyrics];
+let fullText = lyrics.join("\n");
+let tokens = [];
+let visible = 0;
+let tokenIndex = 0;
+let frame = null;
+let audioURL = null;
+let started = false;
+let completed = false;
+let startedAt = false;
+let lineTimes = null;   // segundo em que cada verso começa
+let timedIdx = [];      // índices dos versos não vazios
+let offs = [];          // posição de cada verso no texto completo
+let syncing = false;
+let syncPos = 0;
+let newTimes = [];
+let audioKey = "";
+const TAP_LATENCY = 0.2;
+let lrcTimes = null;
+
+// Tempos da música music.mp3 (85,4 s): [número da palavra na letra, segundo].
+const SONG_SYNC = {
+ dur:85.4,
+ total:165,
+ anchors:[
+  [0,8.03],[9.5,10.47],[19,13.79],[28,16.35],[37,19.82],[45,22.58],
+  [53,26.19],[69,31.43],[76,34.47],[80,37.87],[91,41.55],[100,44.87],
+  [108,47.55],[115,50.35],[123,53.23],[131,56.74],[138,59.58],
+  [146,62.55],[155,65.31],[156,65.9],[165,69.4]
+ ]
+};
+
+const palette = {
+ i:"pink",you:"blue",your:"blue",eyes:"purple",
+ right:"yellowText",now:"orange",baby:"pink",
+ love:"pink",heart:"pink",sound:"greenText",
+ alive:"greenText",cold:"blue",warm:"orange",
+ time:"purple"
+};
+
+function colorWord(word){
+ const key = word.toLowerCase().replace(/[.,!?']/g,"");
+ return palette[key] || "greenText";
+}
+
+function buildTokens(){
+ tokens = [...fullText.matchAll(/\S+/g)].map(m=>({
+  start:m.index,
+  end:m.index+m[0].length,
+  word:m[0]
+ }));
+
+ // Posição e índice de cada verso (sincronização por tempo).
+ timedIdx=[];
+ offs=[];
+ let pos=0;
+ lyrics.forEach((line,i)=>{
+  offs.push(pos);
+  pos+=line.length+1;
+  if(line.trim())timedIdx.push(i);
+ });
+}
+
+buildTokens();
+
+function log(message,color="#94a7bf"){
+ const el=document.createElement("div");
+ el.textContent=message;
+ el.style.color=color;
+ $("terminal").appendChild(el);
+ $("terminal").scrollTop=$("terminal").scrollHeight;
+}
+
+// Tela de inicialização.
+const bootMessages=[
+ "NUTS DEVELOPMENT ENVIRONMENT",
+ "Loading editor components...",
+ "Initializing audio engine...",
+ "Loading text renderer...",
+ "Preparing workspace...",
+ "All systems operational."
+];
+
+let bootIndex=0;
+
+function boot(){
+ if(bootIndex<bootMessages.length){
+  $("bootText").innerHTML+=bootMessages[bootIndex]+"<br>";
+  bootIndex++;
+  setTimeout(boot,420);
+ }else{
+  setTimeout(()=>{
+   $("boot").style.opacity="0";
+   setTimeout(()=>{
+    $("boot").style.display="none";
+    $("app").style.opacity="1";
+   },1000);
+  },500);
+ }
+}
+boot();
+
+// ===== Sincronização por tempo =====
+function targetAt(t){
+ let k=-1;
+ for(let n=0;n<lineTimes.length;n++){
+  if(lineTimes[n]<=t)k=n;else break;
+ }
+ if(k<0)return 0;
+
+ const i=timedIdx[k];
+ const next=lineTimes[k+1];
+ const gap=next===undefined?4:next-lineTimes[k];
+ const dur=Math.max(0.3,Math.min(gap*0.85,5));
+ const frac=Math.min(1,(t-lineTimes[k])/dur);
+
+ return offs[i]+Math.ceil(frac*lyrics[i].length);
+}
+
+function syncKey(){
+ let h=0;
+ for(const c of fullText)h=(h*31+c.codePointAt(0))|0;
+ return "nutsSync|"+audioKey+"|"+h;
+}
+
+function saveTimes(){
+ try{localStorage.setItem(syncKey(),JSON.stringify(lineTimes));}catch(e){}
+}
+
+function interp(x,A){
+ if(x<=A[0][0])return A[0][1];
+ for(let i=1;i<A.length;i++){
+  if(x<=A[i][0]){
+   const x0=A[i-1][0],t0=A[i-1][1],x1=A[i][0],t1=A[i][1];
+   return t0+(x-x0)/(x1-x0)*(t1-t0);
+  }
+ }
+ return A[A.length-1][1];
+}
+
+// Tempos prontos para music.mp3: funciona com qualquer quebra de linha da letra.
+function presetTimes(){
+ if(!Number.isFinite(music.duration) || Math.abs(music.duration-SONG_SYNC.dur)>0.6)return null;
+
+ const total=tokens.length;
+ if(total<SONG_SYNC.total*0.85 || total>SONG_SYNC.total*1.15){
+  log("[SYNC] Cole a letra completa e aplique para sincronizar com esta música.","#ffb86c");
+  return null;
+ }
+
+ const times=[];
+ let before=0;
+
+ lyrics.forEach(line=>{
+  const words=(line.match(/\S+/g)||[]).length;
+  if(words)times.push(interp(before*SONG_SYNC.total/total,SONG_SYNC.anchors));
+  before+=words;
+ });
+
+ return times;
+}
+
+function loadTimes(){
+ lineTimes=lrcTimes;
+ if(lineTimes)return;
+
+ if(audioKey){
+  try{
+   const saved=JSON.parse(localStorage.getItem(syncKey())||"null");
+   if(Array.isArray(saved) && saved.length===timedIdx.length){
+    lineTimes=saved;
+    log("[SYNC] Marcação de tempo encontrada.","#50fa7b");
+    return;
+   }
+  }catch(e){}
+ }
+
+ lineTimes=presetTimes();
+ if(lineTimes)log("[SYNC] Letra sincronizada com a música.","#50fa7b");
+}
+
+async function startSync(){
+ if(!music.src){
+  log("[ERROR] Load a music file first.","#ff5f57");
+  $("state").textContent="NO AUDIO";
+  return;
+ }
+ if(!timedIdx.length){
+  log("[ERROR] Lyrics field is empty.","#ff5f57");
+  return;
+ }
+
+ $("reset").click();
+ syncing=true;
+ syncPos=0;
+ newTimes=[];
+
+ try{
+  await music.play();
+ }catch(error){
+  syncing=false;
+  log("[ERROR] Audio playback failed.","#ff5f57");
+  return;
+ }
+
+ $("sync").textContent="▼ VERSO 1/"+timedIdx.length;
+ $("state").textContent="SYNC MODE";
+ log("[SYNC] Toque no botão quando cada verso começar a ser cantado.","#ffb86c");
+ log("[SYNC] Próximo: "+lyrics[timedIdx[0]],"#8be9fd");
+
+ cancelAnimationFrame(frame);
+ frame=requestAnimationFrame(syncTyping);
+}
+
+function tapLine(){
+ const last=newTimes.length?newTimes[newTimes.length-1]:0;
+ const t=Math.max(last,music.currentTime-TAP_LATENCY);
+ newTimes.push(t);
+ syncPos++;
+
+ log("[SYNC] "+syncPos+"/"+timedIdx.length+" @ "+t.toFixed(1)+"s","#50fa7b");
+
+ if(syncPos>=timedIdx.length){
+  finishSync();
+ }else{
+  $("sync").textContent="▼ VERSO "+(syncPos+1)+"/"+timedIdx.length;
+  log("[SYNC] Próximo: "+lyrics[timedIdx[syncPos]],"#8be9fd");
+ }
+}
+
+function finishSync(){
+ syncing=false;
+ cancelAnimationFrame(frame);
+ music.pause();
+ music.currentTime=0;
+
+ lineTimes=newTimes;
+ saveTimes();
+
+ $("sync").textContent="⏱ SINCRONIZAR";
+ $("state").textContent="SYNC SAVED";
+ $("clock").textContent="00:00";
+ log("[SYNC] Pronto! Aperte EXECUTE.","#50fa7b");
+}
+
+function cancelSync(reason){
+ syncing=false;
+ cancelAnimationFrame(frame);
+ music.pause();
+ music.currentTime=0;
+
+ $("sync").textContent="⏱ SINCRONIZAR";
+ $("state").textContent="READY";
+ $("clock").textContent="00:00";
+ log("[SYNC] Marcação cancelada"+(reason==="ended"?" (a música acabou antes do último verso).":"."),"#ffb86c");
+}
+
+$("sync").addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ if(syncing)tapLine();else startSync();
+});
+
+// Digitação sincronizada com o relógio do áudio.
+function revealTo(target){
+ target=Math.min(target,fullText.length);
+ if(target<=visible)return;
+
+ const fragment=document.createDocumentFragment();
+
+ while(visible<target){
+  const character=fullText[visible];
+
+  if(character==="\n"){
+   fragment.appendChild(document.createTextNode("\n"));
+  }else{
+   while(tokens[tokenIndex] && visible>=tokens[tokenIndex].end){
+    tokenIndex++;
+   }
+
+   const span=document.createElement("span");
+
+   if(tokens[tokenIndex] && visible>=tokens[tokenIndex].start){
+    span.className=colorWord(tokens[tokenIndex].word);
+   }
+
+   span.textContent=character;
+   fragment.appendChild(span);
+  }
+
+  visible++;
+ }
+
+ $("code").appendChild(fragment);
+
+ const displayed=fullText.slice(0,visible);
+ const lineCount=(displayed.match(/\n/g)||[]).length+1;
+
+ $("numbers").textContent=Array.from(
+  {length:lineCount},(_,i)=>i+1
+ ).join("\n");
+
+ $("editorArea").scrollTop=$("editorArea").scrollHeight;
+}
+
+function syncTyping(){
+ if(music.paused || completed)return;
+
+ const currentTime=music.currentTime;
+ const duration=music.duration;
+
+ if(syncing){
+  // Modo marcação: só o relógio anda.
+ }else if(lineTimes){
+  const target=targetAt(currentTime);
+
+  if(!started && target>0){
+   started=true;
+   log("[EDITOR] Synchronized typing started.","#8be9fd");
+  }
+
+  revealTo(target);
+
+  const progress=Math.min(1,visible/Math.max(1,fullText.length));
+  $("progressBar").style.width=(progress*100)+"%";
+  $("state").textContent="SYNC "+Math.floor(progress*100)+"%";
+ }else if(Number.isFinite(duration) && duration>8){
+  if(currentTime>=8 && !started){
+   started=true;
+   $("state").textContent="WRITING...";
+   log("[TIMER] 8 seconds completed.","#50fa7b");
+   log("[EDITOR] Synchronized typing started.","#8be9fd");
+  }
+
+  if(started){
+   const progress=Math.min(1,(currentTime-8)/(duration-8));
+   const target=Math.floor(progress*fullText.length);
+
+   revealTo(target);
+
+   $("progressBar").style.width=(progress*100)+"%";
+   $("state").textContent="SYNC "+Math.floor(progress*100)+"%";
+  }
+ }
+
+ const minutes=Math.floor(currentTime/60);
+ const seconds=Math.floor(currentTime%60);
+ $("clock").textContent=
+  String(minutes).padStart(2,"0")+":"+
+  String(seconds).padStart(2,"0");
+
+ frame=requestAnimationFrame(syncTyping);
+}
+
+async function execute(){
+ if(!music.src){
+  log("[ERROR] Load a music file first.","#ff5f57");
+  $("state").textContent="NO AUDIO";
+  return;
+ }
+
+ if(completed || syncing)return;
+
+ try{
+  await music.play();
+
+  $("play").textContent="RUNNING...";
+  log("[AUDIO] Playback started.","#50fa7b");
+
+  if(!started && !lineTimes){
+   log("[TIMER] Waiting 8 seconds...","#ffb86c");
+  }
+
+  cancelAnimationFrame(frame);
+  frame=requestAnimationFrame(syncTyping);
+
+ }catch(error){
+  log("[ERROR] Audio playback failed.","#ff5f57");
+ }
+}
+
+$("play").addEventListener("click",execute);
+
+// Pausar e continuar.
+$("pause").addEventListener("click",()=>{
+ if(syncing){cancelSync();return;}
+ music.pause();
+ cancelAnimationFrame(frame);
+ $("state").textContent="PAUSED";
+ $("play").textContent="▶ CONTINUE";
+ log("[SYSTEM] Playback paused.","#ffb86c");
+});
+
+// Selecionar música no celular.
+$("audioFile").addEventListener("change",()=>{
+ const file=$("audioFile").files[0];
+ if(!file)return;
+
+ if(audioURL)URL.revokeObjectURL(audioURL);
+
+ audioURL=URL.createObjectURL(file);
+ music.src=audioURL;
+
+ log("[AUDIO] "+file.name+" loaded.","#8be9fd");
+ audioKey=file.name+"|"+file.size;
+ $("state").textContent="AUDIO LOADED";
+});
+
+// Aplicar a letra que você colar.
+$("applyLyrics").addEventListener("click",()=>{
+ const input=$("lyricsInput").value.trim();
+
+ if(!input){
+  log("[ERROR] Lyrics field is empty.","#ff5f57");
+  return;
+ }
+
+ if(!music.paused || started){
+  log("[ERROR] Reset before changing lyrics.","#ffb86c");
+  return;
+ }
+
+ const rows=input.split(/\r?\n/);
+ const stamp=/^\s*\[(\d+):(\d+(?:[.,]\d+)?)\]\s*(.*)$/;
+ let parsed=null;
+
+ // Letra com tempo no formato [mm:ss.xx] texto → sincroniza sozinha.
+ if(rows.filter(r=>stamp.test(r)).length>=Math.max(2,rows.length/2)){
+  parsed=[];
+  lyrics=[];
+  rows.forEach(r=>{
+   const m=r.match(stamp);
+   if(!m)return;
+   lyrics.push(m[3]);
+   if(m[3].trim())parsed.push(parseInt(m[1],10)*60+parseFloat(m[2].replace(",",".")));
+  });
+ }else{
+  lyrics=rows;
+ }
+
+ fullText=lyrics.join("\n");
+ visible=0;
+ tokenIndex=0;
+ buildTokens();
+ lrcTimes=(parsed && parsed.length===timedIdx.length)?parsed:null;
+ loadTimes();
+ if(lrcTimes)log("[SYNC] Tempos da letra aplicados.","#50fa7b");
+
+ $("code").innerHTML="";
+ $("numbers").textContent="1";
+ $("progressBar").style.width="0%";
+
+ log("[EDITOR] Lyrics updated successfully.","#50fa7b");
+ $("state").textContent="LYRICS LOADED";
+});
+
+// Reiniciar tudo.
+$("reset").addEventListener("click",()=>{
+ music.pause();
+ music.currentTime=0;
+ cancelAnimationFrame(frame);
+
+ $("code").innerHTML="";
+ $("numbers").textContent="1";
+ $("terminal").innerHTML="";
+ $("progressBar").style.width="0%";
+
+ visible=0;
+ tokenIndex=0;
+ started=false;
+ completed=false;
+ syncing=false;
+ $("sync").textContent="⏱ SINCRONIZAR";
+
+ $("clock").textContent="00:00";
+ $("state").textContent="READY";
+ $("play").textContent="▶ EXECUTE";
+
+ log("[SYSTEM] Workspace reset.","#50fa7b");
+});
+
+// Final da música.
+music.addEventListener("ended",()=>{
+ if(syncing){cancelSync("ended");return;}
+ cancelAnimationFrame(frame);
+ revealTo(fullText.length);
+
+ completed=true;
+ $("progressBar").style.width="100%";
+ $("state").textContent="COMPLETED";
+ $("play").textContent="▶ EXECUTE";
+
+ log("[BUILD] Audio and text completed.","#50fa7b");
+});
+
+// Se o áudio for curto demais, avisar.
+music.addEventListener("loadedmetadata",()=>{
+ loadTimes();
+ if(music.duration<=8){
+  log("[WARNING] Audio must be longer than 8 seconds.","#ffb86c");
+ }
+});
+</script>
+
+</body>
+</html>
